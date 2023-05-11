@@ -1,53 +1,17 @@
-const express = require('express')
-const contacts = require('../../models/contacts');
-const Joi = require('joi');
-const postSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required()
-});
-const putSchema = Joi.object({
-  name: Joi.string(),
-  email: Joi.string().email(),
-  phone: Joi.string()
-}).or('name', 'email', 'phone');
+const express = require("express");
+const controllers = require("../../controllers/contacts");
+const checkParams = require("../../Helpers/checkParams");
 
-const router = express.Router()
+const router = express.Router();
 
-router.get('/', async (req, res, next) => {
-  const list = await contacts.listContacts();
-  res.json(list);
-})
+router.get("/", controllers.getContacts);
 
-router.get('/:contactId', async (req, res, next) => {
-  const contact = await contacts.getContactById(req.params.contactId);
-  if(contact) res.json(contact);
-  else res.status(404).json({ message: 'Not found' });
-})
+router.get("/:contactId", controllers.getOneContact);
 
-router.post('/', async (req, res, next) => {
-  const { error, value } = postSchema.validate(req.body);
-  if (error) res.status(400).json({message: "missing required name field"})
-  else {
-    const newContact = await contacts.addContact(value);
-    res.status(201).json(newContact);
-  }
-})
+router.post("/", checkParams.postValidate(), controllers.addContact);
 
-router.delete('/:contactId', async (req, res, next) => {
-  const delContact = await contacts.removeContact(req.params.contactId);
-  if(delContact) res.json({message: "contact deleted"});
-  else res.status(404).json({ message: "Not found" })
-})
+router.delete("/:contactId", controllers.deleteContact);
 
-router.put('/:contactId', async (req, res, next) => {
-  const { error, value } = putSchema.validate(req.body);
-  if(error) res.status(400).json({ message: "missing fields" })
-  else {
-    const updContact = await contacts.updateContact(req.params.contactId, value);
-    if(updContact) res.json(updContact);
-    else res.status(404).json({ message: 'Not found' });
-  }
-})
+router.put("/:contactId", checkParams.putValidate(), controllers.updateContact);
 
-module.exports = router
+module.exports = router;
