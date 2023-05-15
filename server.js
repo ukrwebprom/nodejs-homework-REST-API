@@ -1,7 +1,7 @@
 const app = require('./app')
 const mongoose = require('mongoose');
-const {DB_PATH} = require('./config');
 
+const {DB_PATH} = process.env;
 
 mongoose.connect(DB_PATH)
 .then(() => {
