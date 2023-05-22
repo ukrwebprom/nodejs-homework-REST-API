@@ -1,10 +1,11 @@
 const express = require("express");
 const controllers = require("../../controllers/contacts");
 const checkParams = require("../../Helpers/checkParams");
+const authenticate = require('../../Helpers/authenticate');
 
 const router = express.Router();
 
-router.get("/", controllers.getContacts);
+router.get("/", authenticate, controllers.getContacts);
 
 router.get("/:contactId", checkParams.isValidId, controllers.getOneContact);
 
