@@ -22,7 +22,7 @@ const putSchema = Joi.object({
   email: Joi.string().email(),
   phone: Joi.string(),
   favorite: Joi.boolean(),
-}).or("name", "email", "phone");
+}).or("name", "email", "phone", "favorite");
 
 const favSchema = Joi.object({
   favorite: Joi.boolean().required(),

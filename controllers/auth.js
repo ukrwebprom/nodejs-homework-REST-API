@@ -50,8 +50,16 @@ const logout = async (req, res) => {
   res.status(204).send();
 }
 
+const current = async (req, res) => {
+  res.status(200).json({
+      "email": req.user.email,
+      "subscription": req.user.subscription
+  });
+}
+
 module.exports = {
     register: ctrlWrapper(register),
     login: ctrlWrapper(login),
-    logout: ctrlWrapper(logout)
+    logout: ctrlWrapper(logout),
+    current: ctrlWrapper(current)
 }

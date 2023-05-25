@@ -3,7 +3,10 @@ const HttpError = require("../Helpers/HttpError");
 const ctrlWrapper = require("../Helpers/ctrlWrapper");
 
 const getContacts = async (req, res) => {
-  const list = await Contact.find({});
+  const {_id:owner} = req.user;
+  const { page = 1, limit = 20 } = req.query;
+  const skip = (page-1) * limit;
+  const list = await Contact.find({owner}, "-_id -owner", {skip, limit});
   res.json(list);
 };
 
@@ -26,9 +29,10 @@ const deleteContact = async (req, res) => {
 };
 
 const updateContact = async (req, res) => {
+  const {_id:owner} = req.user;
   const updContact = await Contact.findByIdAndUpdate(
     req.params.contactId,
-    req.body,
+    {...req.body, owner},
     {new: true}
   );
   if (updContact) res.json(updContact);
