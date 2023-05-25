@@ -33,10 +33,25 @@ const login = async (req, res) => {
     id:user._id,
   }
   const token = jwt.sign(payload, SECRET_KEY, {expiresIn:'1h'});
-  res.status(200).json({token});
+  await User.findByIdAndUpdate(user._id, {token});
+  res.status(200).json({
+    token,
+    "user": {
+      "email": user.email,
+      "subscription": user.subscription
+    }
+  });
+}
+
+const logout = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if(!user) throw HttpError(401, 'Not authorized');
+  await User.findByIdAndUpdate(user._id, {token:null});
+  res.status(204).send();
 }
 
 module.exports = {
     register: ctrlWrapper(register),
-    login: ctrlWrapper(login)
+    login: ctrlWrapper(login),
+    logout: ctrlWrapper(logout)
 }
