@@ -3,10 +3,11 @@ const HttpError = require("../Helpers/HttpError");
 const ctrlWrapper = require("../Helpers/ctrlWrapper");
 
 const getContacts = async (req, res) => {
-  const {_id:owner} = req.user;
-  const { page = 1, limit = 20, favorite } = req.query;
+  const filter = {owner:req.user._id};
+  if(req.query.favorite) filter.favorite = req.query.favorite;
+  const { page = 1, limit = 20 } = req.query;
   const skip = (page-1) * limit;
-  const list = await Contact.find({owner, favorite}, "-_id -owner", {skip, limit});
+  const list = await Contact.find(filter, "-_id -owner", {skip, limit});
   res.json(list);
 };
 

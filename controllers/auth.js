@@ -59,7 +59,7 @@ const current = async (req, res) => {
 
 const update = async (req, res) => {
   const {subscription} = req.body;
-  const user = await User.findByIdAndUpdate(req.user._id, {subscription});
+  const user = await User.findByIdAndUpdate(req.user._id, {subscription}, {new: true});
   res.status(200).json({
     "email": user.email,
     "subscription": user.subscription
