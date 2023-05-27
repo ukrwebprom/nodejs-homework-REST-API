@@ -22,12 +22,23 @@ const putSchema = Joi.object({
   email: Joi.string().email(),
   phone: Joi.string(),
   favorite: Joi.boolean(),
-}).or("name", "email", "phone");
+}).or("name", "email", "phone", "favorite");
 
 const favSchema = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
+const validateBody = (schema) => {
+  const func = (req, res, next) => {
+    const { error } = schema.validate(req.body);
+    console.log(error);
+    if (error) {
+      next(HttpError(400, `missing required ${error.details[0].path} field`));
+    }
+    next();
+  }
+  return func;
+}
 const postValidate = (req, res, next) => {
     const { error } = postSchema.validate(req.body);
     if (error) {
@@ -54,6 +65,7 @@ const favoriteValidate = (req, res, next) => {
 }
 
 module.exports = {
+  validateBody,
   postValidate,
   putValidate,
   favoriteValidate,
