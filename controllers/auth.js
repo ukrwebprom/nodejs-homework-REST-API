@@ -3,6 +3,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const HttpError = require("../Helpers/HttpError");
 const ctrlWrapper = require("../Helpers/ctrlWrapper");
+const gravatar = require('gravatar');
+const Jimp = require("jimp");
+const fs = require('fs/promises');
+const path = require('path');
 const {SECRET_KEY} = process.env;
 
 const register = async (req, res) => {
@@ -12,8 +16,9 @@ const register = async (req, res) => {
     if(user){
       throw HttpError(409, 'Email in use');
     }
+    const avatarURL = gravatar.url(email, {protocol: 'https', s:250})
     const hashPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({...req.body, password:hashPassword});
+    const newUser = await User.create({...req.body, password:hashPassword, avatarURL});
     res.status(201).json({
         "user": {
           "email": newUser.email,
@@ -66,10 +71,25 @@ const update = async (req, res) => {
 });
 }
 
+const updateAvatar = async (req, res) => {
+  if(!req.file) throw HttpError(400, 'Bad Request');
+  const tmpPath = req.file.path;
+  const ava = await Jimp.read(tmpPath);
+  await ava.cover(250, 250).write(tmpPath);
+  const newName = `${req.user._id}.${ava.getExtension()}`;
+  const newPath = path.resolve('public', 'avatars', newName);
+  await fs.rename(tmpPath, newPath);
+  const user = await User.findByIdAndUpdate(req.user._id, {avatarURL:newPath}, {new: true});
+  res.status(200).json({
+    "avatarURL":user.avatarURL
+  });
+}
+
 module.exports = {
     register: ctrlWrapper(register),
     login: ctrlWrapper(login),
     logout: ctrlWrapper(logout),
     current: ctrlWrapper(current),
-    update: ctrlWrapper(update)
+    update: ctrlWrapper(update),
+    updateAvatar: ctrlWrapper(updateAvatar),
 }
