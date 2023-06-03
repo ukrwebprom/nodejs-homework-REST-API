@@ -79,7 +79,7 @@ const updateAvatar = async (req, res) => {
   const newName = `${req.user._id}.${ava.getExtension()}`;
   const newPath = path.resolve('public', 'avatars', newName);
   await fs.rename(tmpPath, newPath);
-  const user = await User.findByIdAndUpdate(req.user._id, {avatarURL:newPath}, {new: true});
+  const user = await User.findByIdAndUpdate(req.user._id, {avatarURL:`/avatars/${newName}`}, {new: true});
   res.status(200).json({
     "avatarURL":user.avatarURL
   });
